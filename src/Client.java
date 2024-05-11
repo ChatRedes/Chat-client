@@ -4,11 +4,13 @@ import java.util.Scanner;
 
 public class Client {
     private Socket client_socket;
-
+    
     private BufferedReader buffered_reader;
     private BufferedWriter buffered_writer;
-
+    
     private String username;
+
+    public static Scanner scanner;
 
     public Client(Socket client_socket, String username)
     {
@@ -28,7 +30,6 @@ public class Client {
             buffered_writer.write(username);
             buffered_writer.newLine();
             buffered_writer.flush();
-            Scanner scanner = new Scanner(System.in);
             while (client_socket.isConnected()) {
                 String messageToSend = scanner.nextLine();
                 buffered_writer.write(username + ": " + messageToSend);
@@ -58,9 +59,9 @@ public class Client {
     }
 
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
+        Client.scanner = new Scanner(System.in);
         System.out.println("Enter username: ");
-        String username = scanner.nextLine();
+        String username = Client.scanner.nextLine();
 
         try {
             Socket clientSocket = new Socket("localhost", 8080); // Connecting to Server's port
