@@ -2,6 +2,7 @@
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
+.idea/
 
 ### Eclipse ###
 .apt_generated
@@ -25,8 +26,7 @@ bin/
 ### VS Code ###
 .vscode/
 
-### IntelliJ ###
-.idea/
-
 ### Mac OS ###
 .DS_Store
+
+*.iml
