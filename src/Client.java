@@ -9,7 +9,6 @@ public class Client {
     private BufferedWriter buffered_writer;
 
     private String username;
-    private String server_port;
 
     public Client(Socket client_socket, String username)
     {
@@ -18,10 +17,8 @@ public class Client {
             this.buffered_writer = new BufferedWriter(new OutputStreamWriter(client_socket.getOutputStream()));
             this.buffered_reader = new BufferedReader(new InputStreamReader(client_socket.getInputStream()));
             this.username = username;
-            System.out.println("Error: Failed to start the server on port " + client_socket.getPort());
-
         } catch (IOException e) {
-            System.err.println("Error: Failed to start the server on port " + client_socket.getPort());
+            System.err.println("Error: Failed to start the client: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -40,35 +37,38 @@ public class Client {
             }
 
         } catch (IOException e) {
-            System.err.println("Error: Failed to start the server on port " + client_socket.getPort());
+            System.err.println("Error sending message: " + e.getMessage());
         }
     }
 
-    public void listen_message() {
+    public void receiveMessage() {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                String messageFromGroupChat;
-                while (client_socket.isConnected()) {
-                    try {
-                        messageFromGroupChat = buffered_reader.readLine();
-                        System.out.println(messageFromGroupChat);
-                    } catch (IOException e) {
-                        System.err.println("Error: Failed to listen server on port " + client_socket.getPort());
+                String messageFromServer;
+                try {
+                    while ((messageFromServer = buffered_reader.readLine()) != null) {
+                        System.out.println(messageFromServer);
                     }
+                } catch (IOException e) {
+                    System.err.println("Error receiving message: " + e.getMessage());
                 }
             }
         }).start();
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter username: ");
         String username = scanner.nextLine();
-        Socket clientSocket = new Socket("localhost", 1234);
-        Client client = new Client(clientSocket, username);
-        client.listen_message();
-        client.sendMessage();
 
+        try {
+            Socket clientSocket = new Socket("localhost", 8080); // Connecting to Server's port
+            Client client = new Client(clientSocket, username);
+            client.receiveMessage();
+            client.sendMessage();
+        } catch (IOException e) {
+            System.err.println("Error connecting to server: " + e.getMessage());
+        }
     }
 }
