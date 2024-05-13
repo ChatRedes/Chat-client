@@ -12,10 +12,11 @@ public class Client {
     
     private String username;
 
-    public static Scanner scanner;
+    public Scanner scanner;
 
     public Client(Socket client_socket)
     {
+        this.scanner = new Scanner(System.in);
         try {
             this.client_socket = client_socket;
             this.buffered_writer = new BufferedWriter(new OutputStreamWriter(client_socket.getOutputStream()));
@@ -132,9 +133,7 @@ public class Client {
         }
     }
 
-    
     public static void main(String[] args) {
-
         try {
             Socket clientSocket = new Socket("localhost", 8080); // Connecting to Server's port
             Client client = new Client(clientSocket);
