@@ -42,7 +42,6 @@ public class Client {
             sendRequest(request);
 
             String serverResponse = bufferedReader.readLine();
-            System.out.println("Server response " + serverResponse);
             String[] response = serverResponse.split(" ", 2);
 
             if (response[0].equals("REGISTRO_OK")) {
