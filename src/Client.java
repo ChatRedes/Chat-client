@@ -222,7 +222,7 @@ public class Client {
     }
 
     private void enterChat() {
-        String request = "ENTRAR_CHAT ";
+        String request = "ENTRAR_SALA ";
 
         System.out.println("Enter chat name: ");
         String chatName = scanner.nextLine();
