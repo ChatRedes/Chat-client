@@ -256,7 +256,7 @@ public class Client {
         scanner.nextLine();
 
         String chatType = "";
-        while (chatType != "public" && chatType != "private") {
+        while (!chatType.equals("public") && !chatType.equals("private")) {
             System.out.println("The chat will be public or private?");
             chatType = scanner.nextLine();
             chatType = chatType.toLowerCase();
@@ -264,15 +264,18 @@ public class Client {
         }
 
         String request = null;
-        if (chatType == "public") {
+        if (chatType.equals("public")) {
             request = createPublicChat(chatName);
+            sendRequest(request);
+            return;
         }
 
-        if (chatType == "private") {
+        if (chatType.equals("private")) {
             request = createPrivateChat(chatName);
+            sendRequest(request);
+            return;
         }
 
-        sendRequest(request);
     }
 
     private String createPublicChat(String chatName) {
