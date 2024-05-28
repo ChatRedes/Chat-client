@@ -276,14 +276,12 @@ public class Client {
             sendRequest(request);
             return;
         }
-
     }
 
     private String createPublicChat(String chatName) {
         String request;
 
         request = "CRIAR_SALA PUBLICA " + chatName;
-        sendRequest(request);
         return request;
     }
 
@@ -367,6 +365,7 @@ public class Client {
 
     private void sendRequest(String request) {
         try {
+            System.out.println("Sending request: " + request);
             bufferedWriter.write(request);
             bufferedWriter.newLine();
             bufferedWriter.flush();
