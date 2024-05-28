@@ -3,11 +3,12 @@ import java.net.Socket;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Scanner;
+import Utils.*;
 
 public class Client {
     private Socket clientSocket;
     private ArrayList<Chat> chats;
-    
+    private Clientcripto cripto;
     private BufferedReader bufferedReader;
     private BufferedWriter bufferedWriter;
     
@@ -25,6 +26,8 @@ public class Client {
             client.register_client();
         }
 
+        client.authenticateClient();
+
         client.receiveMessage();
         client.gui();
     }
@@ -40,7 +43,7 @@ public class Client {
 
         String request = "REGISTRO " + username;
         try {
-            sendRequest(request);
+            unsafeRequest(request);
 
             String serverResponse = bufferedReader.readLine();
             String[] response = serverResponse.split(" ", 2);
@@ -60,7 +63,32 @@ public class Client {
             System.err.println("Erro: " + e.getMessage());
             close_client();
         }
+    }
 
+    private void authenticateClient () {
+        unsafeRequest("AUTENTICACAO " + username);
+        try {
+            String serverResponse = bufferedReader.readLine();
+            String[] parsedResponse = serverResponse.split(" ");
+
+            if (parsedResponse.length != 2) {
+                System.err.println("Invalid response from server: " + serverResponse);
+                close_client();
+            }
+
+            if (!parsedResponse[0].equals("CHAVE_PUBLICA")) {
+                System.err.println("Authentication failed");
+                close_client();
+            }
+
+            String publicKey = parsedResponse[1];
+            String request = cripto.setSimetricKey(publicKey);
+            unsafeRequest(request);
+
+        } catch (Exception e) {
+            System.err.println("Erro: " + e.getMessage());
+            close_client();
+        }
     }
 
     private void receiveMessage() {
@@ -366,10 +394,23 @@ public class Client {
     private void sendRequest(String request) {
         try {
             System.out.println("Sending request: " + request);
+            String encryptedRequest = cripto.encryptedMessage(request);
+            bufferedWriter.write(encryptedRequest);
+            bufferedWriter.newLine();
+            bufferedWriter.flush();
+        } catch (Exception e) {
+            System.err.println("Error sending request: " + e.getMessage());
+            close_client();
+        }
+    }
+
+    private void unsafeRequest(String request) {
+        try {
+            System.out.println("Sending request: " + request);
             bufferedWriter.write(request);
             bufferedWriter.newLine();
             bufferedWriter.flush();
-        } catch (IOException e) {
+        } catch (Exception e) {
             System.err.println("Error sending request: " + e.getMessage());
             close_client();
         }
