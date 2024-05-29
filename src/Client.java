@@ -11,12 +11,13 @@ public class Client {
     private Clientcripto cripto;
     private BufferedReader bufferedReader;
     private BufferedWriter bufferedWriter;
-    
+
     private String username;
     private Boolean logedIn = false;
+    private Boolean waitingResponse = false;
 
     public Scanner scanner;
-    
+
     public static void main(String[] args) {
         Client client = new Client();
         client.searchServer();
@@ -32,8 +33,7 @@ public class Client {
         client.gui();
     }
 
-    public Client()
-    {
+    public Client() {
         this.scanner = new Scanner(System.in);
         this.cripto = new Clientcripto();
     }
@@ -66,7 +66,7 @@ public class Client {
         }
     }
 
-    private void authenticateClient () {
+    private void authenticateClient() {
         unsafeRequest("AUTENTICACAO " + username);
         try {
             String serverResponse = bufferedReader.readLine();
@@ -99,7 +99,6 @@ public class Client {
                 String serverMessage;
                 try {
                     while ((serverMessage = bufferedReader.readLine()) != null) {
-                        System.out.println(serverMessage);
                         parse_response(serverMessage);
                     }
                 } catch (IOException e) {
@@ -137,17 +136,65 @@ public class Client {
             add_chat_message(response[1]);
             return;
         }
+        
+        if (response[0].equals("CRIAR_SALA_OK")) {
+
+            waitingResponse = false;
+            return;
+        }
+
+        if (response[0].equals("SALAS")) {
+        
+            waitingResponse = false;
+            return;
+        }
+        
+        if (response[0].equals("ENTRAR_SALA_OK")) {
+            
+            waitingResponse = false;
+            return;
+        }
+        
+        if (response[0].equals("ENTROU")) {
+            
+            waitingResponse = false;
+            return;
+        }
+
+        if (response[0].equals("SAIR_SALA_OK")) {
+
+            waitingResponse = false;
+            return;
+        }
+
+        if (response[0].equals("SAIU")) {
+            
+        }
 
         if (response[0].equals("REGISTRO_OK")) {
             System.out.println("Registration successful!");
             logedIn = true;
             return;
         }
-        
-        if (response[0].equals("ERRO")) {
-            System.out.println("Erro: " + response[1]);
+
+        if (response[0].equals("FECHAR_SALA_OK")) {
+
+            waitingResponse = false;
             return;
         }
+
+        if (response[0].equals("SALA_FECHADA")) {
+
+            waitingResponse = false;
+            return;
+        }
+
+        if (response[0].equals("ERRO")) {
+            System.out.println("Erro: " + response[1]);
+            waitingResponse = false;
+            return;
+        }
+
 
         return;
     }
@@ -193,7 +240,7 @@ public class Client {
     }
 
     private void gui() {
-        while (true) {
+        while (true && !waitingResponse) {
             System.out.printf("\n\n%s\n", username);
             System.out.println("Enter option: ");
             System.out.println("Option 1 - Search Chats");
@@ -214,7 +261,7 @@ public class Client {
             case "1":
                 searchChats();
                 break;
-            
+
             case "2":
                 enterChat();
                 break;
@@ -238,7 +285,7 @@ public class Client {
             case "7":
                 close_client();
                 break;
-        
+
             default:
                 break;
         }
@@ -247,6 +294,7 @@ public class Client {
     private void searchChats() {
         System.out.println("Searching chats...");
         String request = "LISTAR_SALAS";
+        waitingResponse = true;
         sendRequest(request);
     }
 
@@ -267,9 +315,10 @@ public class Client {
             request += " " + createHash(senha);
         }
 
+        waitingResponse = true;
         sendRequest(request);
     }
-    
+
     private void sendMessage() {
         System.out.println("Enter chat: ");
         String chat = scanner.nextLine();
@@ -296,12 +345,14 @@ public class Client {
         String request = null;
         if (chatType.equals("public")) {
             request = createPublicChat(chatName);
+            waitingResponse = true;
             sendRequest(request);
             return;
         }
 
         if (chatType.equals("private")) {
             request = createPrivateChat(chatName);
+            waitingResponse = true;
             sendRequest(request);
             return;
         }
@@ -333,12 +384,12 @@ public class Client {
         try {
             MessageDigest algorithm = MessageDigest.getInstance("SHA-256");
             byte hash[] = algorithm.digest(senha.getBytes("UTF-8"));
-    
+
             StringBuilder texto = new StringBuilder();
             for (byte b : hash) {
                 texto.append(String.format("%02X", 0xFF & b));
             }
-            return texto.toString();    
+            return texto.toString();
         } catch (Exception e) {
             System.out.println("Error: Failed to create hash: " + e.getMessage());
             return null;
@@ -386,15 +437,15 @@ public class Client {
 
         System.out.println("Enter chat: ");
         String chatName = scanner.nextLine();
-    
+
         request += chatName;
 
+        waitingResponse = true;
         sendRequest(request);
     }
 
     private void sendRequest(String request) {
         try {
-            System.out.println("Sending request: " + request);
             String encryptedRequest = cripto.encryptedMessage(request);
             bufferedWriter.write(encryptedRequest);
             bufferedWriter.newLine();
@@ -407,7 +458,6 @@ public class Client {
 
     private void unsafeRequest(String request) {
         try {
-            System.out.println("Sending request: " + request);
             bufferedWriter.write(request);
             bufferedWriter.newLine();
             bufferedWriter.flush();

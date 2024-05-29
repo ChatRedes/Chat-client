@@ -13,14 +13,13 @@ public class Clientcripto {
     private SecretKey key;
 
     public Clientcripto() {
-        System.err.println("chegou aqui");
         try {
             KeyGenerator generator = KeyGenerator.getInstance("AES");
+            generator.init(256);
             this.key = generator.generateKey();
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
     public String setSimetricKey(String publicKey64) throws Exception {
@@ -32,9 +31,7 @@ public class Clientcripto {
         Cipher cipher =  Cipher.getInstance("RSA");
         cipher.init(Cipher.ENCRYPT_MODE, publicKey);
 
-
-        String message = "CHAVE_SIMETRICA " + this.key.getEncoded();
-        System.err.println("message: " + message);
+        String message = "CHAVE_SIMETRICA " + Base64.getEncoder().encodeToString(this.key.getEncoded());
         byte[] encryptedAesKey = cipher.doFinal(message.getBytes());
 
         String encryptedKeyMessage = Base64.getEncoder().encodeToString(encryptedAesKey);
