@@ -35,6 +35,7 @@ public class Client {
     public Client()
     {
         this.scanner = new Scanner(System.in);
+        this.cripto = new Clientcripto();
     }
 
     private void register_client() {

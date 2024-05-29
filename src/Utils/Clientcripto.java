@@ -12,7 +12,8 @@ import java.util.Base64;
 public class Clientcripto {
     private SecretKey key;
 
-    public void AuthenticationClient() {
+    public Clientcripto() {
+        System.err.println("chegou aqui");
         try {
             KeyGenerator generator = KeyGenerator.getInstance("AES");
             this.key = generator.generateKey();
@@ -33,6 +34,7 @@ public class Clientcripto {
 
 
         String message = "CHAVE_SIMETRICA " + this.key.getEncoded();
+        System.err.println("message: " + message);
         byte[] encryptedAesKey = cipher.doFinal(message.getBytes());
 
         String encryptedKeyMessage = Base64.getEncoder().encodeToString(encryptedAesKey);
