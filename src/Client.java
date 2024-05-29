@@ -138,7 +138,6 @@ public class Client {
             message = "ERRO Não foi possível decifrar a mensagem";
         }
 
-        System.out.println(message);
         String[] response = message.split(" ", 2);
         if (response[0].equals("MENSAGEM")) {
             String[] receivedMessage = response[1].split(" ", 3);
@@ -165,30 +164,27 @@ public class Client {
         }
         
         if (response[0].equals("ENTRAR_SALA_OK")) {
-            
+            System.out.println("Chat joined successfully!");
             waitingResponse = false;
             return;
         }
         
         if (response[0].equals("ENTROU")) {
-            
+            String[] parsedMessage = response[1].split(" ");
+            System.out.println("The user " + parsedMessage[1] + " joined the chat " + parsedMessage[0]);
             waitingResponse = false;
             return;
         }
 
         if (response[0].equals("SAIR_SALA_OK")) {
-
+            System.out.println("Chat left successfully!");
             waitingResponse = false;
             return;
         }
 
         if (response[0].equals("SAIU")) {
-            
-        }
-
-        if (response[0].equals("REGISTRO_OK")) {
-            System.out.println("Registration successful!");
-            logedIn = true;
+            String[] parsedMessage = response[1].split(" ");
+            System.out.println("The user " + parsedMessage[1] + " left the chat " + parsedMessage[0]);
             return;
         }
 
@@ -258,7 +254,10 @@ public class Client {
         while (true) {
             while (waitingResponse) {
                 // do nothing
-                System.out.println("Waiting for response...");
+                try {
+                    wait(1);
+                } catch (Exception e) {
+                }
             }
             System.out.printf("\n\n%s\n", username);
             System.out.println("Enter option: ");
