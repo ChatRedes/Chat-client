@@ -131,20 +131,35 @@ public class Client {
     }
 
     private void parse_response(String serverMessage) {
-        String[] response = serverMessage.split(" ", 2);
+        String message;
+        try {
+            message = cripto.decryptMessageFromClient(serverMessage);
+        } catch (Exception e) {
+            message = "ERRO Não foi possível decifrar a mensagem";
+        }
+
+        System.out.println(message);
+        String[] response = message.split(" ", 2);
         if (response[0].equals("MENSAGEM")) {
-            add_chat_message(response[1]);
+            String[] receivedMessage = response[1].split(" ", 3);
+            String chatName = receivedMessage[0];
+            String username = receivedMessage[1];
+            String chatMessage = receivedMessage[2];
+            System.out.println(chatName + " - " + username + ": " + chatMessage);
             return;
         }
         
         if (response[0].equals("CRIAR_SALA_OK")) {
-
+            System.out.println("Chat created successfully!");
             waitingResponse = false;
             return;
         }
 
         if (response[0].equals("SALAS")) {
-        
+            String[] salas = response[1].split(" ");
+            for (String sala : salas) {
+                System.out.println(sala);
+            }
             waitingResponse = false;
             return;
         }
@@ -240,7 +255,11 @@ public class Client {
     }
 
     private void gui() {
-        while (true && !waitingResponse) {
+        while (true) {
+            while (waitingResponse) {
+                // do nothing
+                System.out.println("Waiting for response...");
+            }
             System.out.printf("\n\n%s\n", username);
             System.out.println("Enter option: ");
             System.out.println("Option 1 - Search Chats");
