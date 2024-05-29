@@ -7,7 +7,6 @@ import Utils.*;
 
 public class Client {
     private Socket clientSocket;
-    private ArrayList<Chat> chats;
     private Clientcripto cripto;
     private BufferedReader bufferedReader;
     private BufferedWriter bufferedWriter;
@@ -109,27 +108,6 @@ public class Client {
         }).start();
     }
 
-    private void add_chat_message(String server_Message) {
-        String[] parameters = server_Message.split(" ", 3);
-        int chat_index = find_chat_index(parameters[0]);
-        if (chat_index == -1) {
-            return;
-        }
-        String usuario = parameters[1];
-        String mensagem = parameters[2];
-        Chat chat = chats.get(chat_index);
-        chat.addMessage(usuario, mensagem);
-    }
-
-    private int find_chat_index(String chat_name) {
-        for (Chat chat : chats) {
-            if (chat.getNome().equals(chat_name)) {
-                return chats.indexOf(chat);
-            }
-        }
-        return -1;
-    }
-
     private void parse_response(String serverMessage) {
         String message;
         try {
@@ -206,7 +184,18 @@ public class Client {
             return;
         }
 
+        if (response[0].equals("BANIMENTO_OK")) {
+            System.out.println("You've banned user successfully");
+            return;
+        }
 
+        if (response[0].equals("BANIDO_DA_SALA")) {
+            String[] parsedResponse = response[1].split(" ");
+            System.out.println("You were banned from chat " + parsedResponse[0]);
+            return;
+        }
+
+        System.out.println("Mensagem recebida não reconhecida: " + message);
         return;
     }
 
@@ -230,7 +219,7 @@ public class Client {
         System.out.println("Enter the port to connect: ");
         String port = scanner.nextLine();
 
-        try {
+                try {
             clientSocket = new Socket(host, Integer.parseInt(port));
             return true;
         } catch (IOException e) {
@@ -265,8 +254,8 @@ public class Client {
             System.out.println("Option 2 - Enter Chat");
             System.out.println("Option 3 - Sent message");
             System.out.println("Option 4 - Create Chat");
-            System.out.println("Option 5 - List Your Chats");
-            System.out.println("Option 6 - Quit Chat");
+            System.out.println("Option 5 - Quit Chat");
+            System.out.println("Option 6 - Ban user");
             System.out.println("Option 7 - Exit");
 
             String option = scanner.nextLine();
@@ -293,18 +282,18 @@ public class Client {
                 break;
 
             case "5":
-                listYourChats();
+                quitChat();
                 break;
 
             case "6":
-                quitChat();
+                banUser();
                 break;
 
             case "7":
                 close_client();
                 break;
 
-            default:
+                default:
                 break;
         }
     }
@@ -414,42 +403,6 @@ public class Client {
         }
     }
 
-    private void listYourChats() {
-        if (chats.size() == 0) {
-            System.out.println("You don't have any chats yet");
-            return;
-        }
-
-        int index = 1;
-        for (Chat chat : chats) {
-            System.out.printf("[%d] %s\n", index, chat.getNome());
-            index++;
-        }
-        System.out.println("[0] Cancel");
-
-        System.out.println("Enter chat index: ");
-        int chatIndex = scanner.nextInt();
-        scanner.nextLine();
-
-        if (chatIndex == 0) {
-            return;
-        }
-
-        chatIndex -= 1; // Subtrair 1 pois o index começa em 1
-        if (chatIndex < 0 || chatIndex >= chats.size()) {
-            System.out.println("Invalid chat index");
-            return;
-        }
-
-        listChatMessages(chatIndex);
-        return;
-    }
-
-    private void listChatMessages(int index) {
-        Chat chat = chats.get(index); // Obter o chat selecionado.
-        chat.printMessages();
-    }
-
     private void quitChat() {
         String request = "SAIR_SALA ";
 
@@ -458,6 +411,18 @@ public class Client {
 
         request += chatName;
 
+        waitingResponse = true;
+        sendRequest(request);
+    }
+    
+    private void banUser() {
+        System.out.println("Enter chat: ");
+        String chatName = scanner.nextLine();
+
+        System.out.println("Enter user to be banned: ");
+        String userName = scanner.nextLine();
+
+        String request = "BANIR_USUARIO " + chatName + " " + userName;
         waitingResponse = true;
         sendRequest(request);
     }
