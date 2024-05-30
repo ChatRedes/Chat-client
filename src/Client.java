@@ -143,6 +143,7 @@ public class Client {
         
         if (response[0].equals("ENTRAR_SALA_OK")) {
             System.out.println("Chat joined successfully!");
+            System.out.println("Os usuarios nesta sala sao: " + response[1]);
             waitingResponse = false;
             return;
         }
@@ -150,7 +151,6 @@ public class Client {
         if (response[0].equals("ENTROU")) {
             String[] parsedMessage = response[1].split(" ");
             System.out.println("The user " + parsedMessage[1] + " joined the chat " + parsedMessage[0]);
-            waitingResponse = false;
             return;
         }
 
@@ -186,6 +186,7 @@ public class Client {
 
         if (response[0].equals("BANIMENTO_OK")) {
             System.out.println("You've banned user successfully");
+            waitingResponse = false;
             return;
         }
 
@@ -241,14 +242,15 @@ public class Client {
 
     private void gui() {
         while (true) {
+            System.out.printf("\n\n\n");
             while (waitingResponse) {
                 // do nothing
                 try {
-                    wait(1);
+                    wait(100);
                 } catch (Exception e) {
                 }
             }
-            System.out.printf("\n\n%s\n", username);
+            System.out.printf("\n%s\n", username);
             System.out.println("Enter option: ");
             System.out.println("Option 1 - Search Chats");
             System.out.println("Option 2 - Enter Chat");
